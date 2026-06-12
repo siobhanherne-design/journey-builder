@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, type MutableRefObject } from "react";
 import type { PanelMode, SavedRuleSummary, TimeDelayConfig, DestinationConfig, Rule, Junction } from "@/lib/types";
 import { RuleBuilder } from "./right-panel/RuleBuilder";
 import { TimeDelayBuilder } from "./right-panel/TimeDelayBuilder";
@@ -15,6 +16,8 @@ interface RightPanelProps {
   onSaveTimeDelay: (config: TimeDelayConfig) => void;
   onSaveDestination: (config: DestinationConfig) => void;
   drafts: Record<string, any>;
+  unsavedCheckRef: MutableRefObject<(() => boolean) | null>;
+  triggerSaveModalRef: MutableRefObject<(() => void) | null>;
 }
 
 const nodeTypeToMode: Record<string, PanelMode> = {
@@ -33,12 +36,21 @@ export function RightPanel({
   onSaveTimeDelay,
   onSaveDestination,
   drafts,
+  unsavedCheckRef,
+  triggerSaveModalRef,
 }: RightPanelProps) {
   const mode = nodeType ? nodeTypeToMode[nodeType] : null;
   const isTimeDelay = nodeType === "time_delay";
   const isDestination = nodeType === "destination";
 
   const draft = nodeId ? drafts[nodeId] : undefined;
+  const [resetKey, setResetKey] = useState(0);
+
+  const handleCancel = () => {
+    if (nodeId) delete drafts[nodeId];
+    setResetKey((k) => k + 1);
+    onClose();
+  };
 
   return (
     <div
@@ -48,31 +60,40 @@ export function RightPanel({
     >
       {isDestination ? (
         <DestinationBuilder
-          key={nodeId}
+          key={`${nodeId}-${resetKey}`}
           onClose={onClose}
+          onCancel={handleCancel}
           onSave={(config) => {
             if (nodeId) delete drafts[nodeId];
             onSaveDestination(config);
           }}
           initialConfig={draft?.destinationConfig ?? (nodeData?.destinationConfig as DestinationConfig | undefined)}
           onDraftChange={nodeId ? (d) => { drafts[nodeId] = { destinationConfig: d }; } : undefined}
+          hasSavedRule={!!(nodeData?.destinationConfig as DestinationConfig | undefined)?.connectors?.length}
+          unsavedCheckRef={unsavedCheckRef}
+          triggerSaveModalRef={triggerSaveModalRef}
         />
       ) : isTimeDelay ? (
         <TimeDelayBuilder
-          key={nodeId}
+          key={`${nodeId}-${resetKey}`}
           onClose={onClose}
+          onCancel={handleCancel}
           onSave={(config) => {
             if (nodeId) delete drafts[nodeId];
             onSaveTimeDelay(config);
           }}
           initialConfig={draft?.delayConfig ?? (nodeData?.delayConfig as TimeDelayConfig | undefined)}
           onDraftChange={nodeId ? (d) => { drafts[nodeId] = { delayConfig: d }; } : undefined}
+          hasSavedRule={!!(nodeData?.delayConfig as TimeDelayConfig | undefined)}
+          unsavedCheckRef={unsavedCheckRef}
+          triggerSaveModalRef={triggerSaveModalRef}
         />
       ) : mode ? (
         <RuleBuilder
-          key={nodeId}
+          key={`${nodeId}-${resetKey}`}
           mode={mode}
           onClose={onClose}
+          onCancel={handleCancel}
           onSave={(data) => {
             if (nodeId) delete drafts[nodeId];
             onSave(data);
@@ -80,6 +101,9 @@ export function RightPanel({
           initialRules={draft?.rules ?? (nodeData?.fullRules as Rule[] | undefined)}
           initialJunctions={draft?.junctions ?? (nodeData?.fullJunctions as Junction[] | undefined)}
           onDraftChange={nodeId ? (rules, junctions) => { drafts[nodeId] = { rules, junctions }; } : undefined}
+          hasSavedRule={!!(nodeData?.fullRules as Rule[] | undefined)?.length}
+          unsavedCheckRef={unsavedCheckRef}
+          triggerSaveModalRef={triggerSaveModalRef}
         />
       ) : (
         <div className="p-5">

@@ -97,8 +97,8 @@ function TypeIcon({ type }: { type: "event" | "fact" | "audience" }) {
     );
   }
   return (
-    <span className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center bg-[#fef3c7]">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <span className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center bg-[#ede9fe]">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />

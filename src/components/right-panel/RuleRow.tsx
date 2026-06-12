@@ -16,7 +16,7 @@ import { CopyIcon, TrashIcon, PlusIcon, ChevronDownIcon } from "./icons";
 function RuleTypeIcon({ type }: { type: string | null }) {
   if (type === "event") {
     return (
-      <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center bg-[#fff3e0]">
+      <span className="w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center bg-[#fff3e0]">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="m4 4 7.07 17 2.51-7.39L21 11.07z" />
         </svg>
@@ -25,7 +25,7 @@ function RuleTypeIcon({ type }: { type: string | null }) {
   }
   if (type === "fact") {
     return (
-      <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center bg-[#fce7f3]">
+      <span className="w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center bg-[#fce7f3]">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
@@ -35,8 +35,8 @@ function RuleTypeIcon({ type }: { type: string | null }) {
   }
   if (type === "audience") {
     return (
-      <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center bg-[#fef3c7]">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <span className="w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center bg-[#ede9fe]">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -382,8 +382,9 @@ export function RuleRow({
           <CategoryPicker onSelect={handlePickerSelect} />
         ) : (
           <>
-            {/* Main rule row: category + first property inline */}
+            {/* Main rule row: icon + category + first property inline */}
             <div className="flex items-center gap-2">
+              <RuleTypeIcon type={rule.ruleType} />
               <SelectDropdown
                 value={rule.ruleType === "audience" ? rule.audienceName : rule.categoryName}
                 onChange={(val) => {

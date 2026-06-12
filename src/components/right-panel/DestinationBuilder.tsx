@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, type MutableRefObject } from "react";
 import type { DestinationConfig, DestinationConnector } from "@/lib/types";
 import { createEmptyConnector } from "@/lib/types";
 import { destinationPlatforms, destinationAccounts } from "@/lib/mock-data";
@@ -8,9 +8,13 @@ import { CloseIcon, PlusIcon, CopyIcon, TrashIcon, ChevronDownIcon } from "./ico
 
 interface DestinationBuilderProps {
   onClose: () => void;
+  onCancel: () => void;
   onSave: (config: DestinationConfig) => void;
   initialConfig?: DestinationConfig;
   onDraftChange?: (config: DestinationConfig) => void;
+  hasSavedRule?: boolean;
+  unsavedCheckRef?: MutableRefObject<(() => boolean) | null>;
+  triggerSaveModalRef?: MutableRefObject<(() => void) | null>;
 }
 
 function PlatformIcon({ platformId }: { platformId: string }) {
@@ -130,9 +134,13 @@ function ConnectorRow({
 
 export function DestinationBuilder({
   onClose,
+  onCancel,
   onSave,
   initialConfig,
   onDraftChange,
+  hasSavedRule,
+  unsavedCheckRef,
+  triggerSaveModalRef,
 }: DestinationBuilderProps) {
   const [connectors, setConnectors] = useState<DestinationConnector[]>(
     initialConfig?.connectors?.length
@@ -140,6 +148,30 @@ export function DestinationBuilder({
       : [createEmptyConnector()],
   );
   const mountedRef = useRef(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const savedStateRef = useRef(JSON.stringify(initialConfig || {}));
+
+  const hasUnsavedChanges = useCallback(() => {
+    if (!hasSavedRule) return false;
+    return JSON.stringify({ connectors }) !== savedStateRef.current;
+  }, [connectors, hasSavedRule]);
+
+  const handleClose = useCallback(() => {
+    if (hasUnsavedChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      onClose();
+    }
+  }, [hasUnsavedChanges, onClose]);
+
+  useEffect(() => {
+    if (unsavedCheckRef) unsavedCheckRef.current = hasUnsavedChanges;
+    if (triggerSaveModalRef) triggerSaveModalRef.current = () => setShowUnsavedModal(true);
+    return () => {
+      if (unsavedCheckRef) unsavedCheckRef.current = null;
+      if (triggerSaveModalRef) triggerSaveModalRef.current = null;
+    };
+  }, [hasUnsavedChanges, unsavedCheckRef, triggerSaveModalRef]);
 
   useEffect(() => {
     if (!mountedRef.current) { mountedRef.current = true; return; }
@@ -195,7 +227,7 @@ export function DestinationBuilder({
           </div>
         </div>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#f5f6fa] text-[#9b9daf] hover:text-[#6c6e82] transition-colors mt-0.5"
         >
           <CloseIcon />
@@ -229,7 +261,7 @@ export function DestinationBuilder({
       {/* Footer */}
       <div className="flex items-center gap-2 px-5 py-4 border-t border-[#e5e7f0] flex-shrink-0">
         <button
-          onClick={onClose}
+          onClick={onCancel}
           className="flex-1 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
         >
           Cancel
@@ -241,6 +273,29 @@ export function DestinationBuilder({
           Save rule
         </button>
       </div>
+
+      {showUnsavedModal && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20">
+          <div className="bg-white rounded-xl border border-[#e5e7f0] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 mx-6 max-w-sm w-full">
+            <h3 className="text-[14px] font-bold text-[#1a1b2e] mb-1">Save changes?</h3>
+            <p className="text-[12px] text-[#6c6e82] mb-5">You have unsaved changes. Would you like to save them before closing?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowUnsavedModal(false); onCancel(); }}
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+              >
+                No, cancel updates
+              </button>
+              <button
+                onClick={() => { handleSave(); setShowUnsavedModal(false); }}
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+              >
+                Yes, save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

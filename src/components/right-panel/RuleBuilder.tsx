@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, type MutableRefObject } from "react";
 import type { Rule, Junction, PanelMode, SavedRuleSummary } from "@/lib/types";
 import { createEmptyRule } from "@/lib/types";
 import { eventTypes, factGroups, audienceSegments } from "@/lib/mock-data";
@@ -12,10 +12,14 @@ import { PlusIcon, CloseIcon } from "./icons";
 interface RuleBuilderProps {
   mode: PanelMode;
   onClose: () => void;
+  onCancel: () => void;
   onSave: (data: { summaries: SavedRuleSummary[]; rules: Rule[]; junctions: Junction[] }) => void;
   initialRules?: Rule[];
   initialJunctions?: Junction[];
   onDraftChange?: (rules: Rule[], junctions: Junction[]) => void;
+  hasSavedRule?: boolean;
+  unsavedCheckRef?: MutableRefObject<(() => boolean) | null>;
+  triggerSaveModalRef?: MutableRefObject<(() => void) | null>;
 }
 
 const modeConfig: Record<PanelMode, { title: string; subtitle: string }> = {
@@ -49,10 +53,34 @@ function getRuleLabel(rule: Rule): string | null {
   return null;
 }
 
-export function RuleBuilder({ mode, onClose, onSave, initialRules, initialJunctions, onDraftChange }: RuleBuilderProps) {
+export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, initialJunctions, onDraftChange, hasSavedRule, unsavedCheckRef, triggerSaveModalRef }: RuleBuilderProps) {
   const [rules, setRules] = useState<Rule[]>(initialRules?.length ? initialRules : [createEmptyRule()]);
   const [junctions, setJunctions] = useState<Junction[]>(initialJunctions || []);
   const mountedRef = useRef(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const savedStateRef = useRef(JSON.stringify({ rules: initialRules || [], junctions: initialJunctions || [] }));
+
+  const hasUnsavedChanges = useCallback(() => {
+    if (!hasSavedRule) return false;
+    return JSON.stringify({ rules, junctions }) !== savedStateRef.current;
+  }, [rules, junctions, hasSavedRule]);
+
+  const handleClose = useCallback(() => {
+    if (hasUnsavedChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      onClose();
+    }
+  }, [hasUnsavedChanges, onClose]);
+
+  useEffect(() => {
+    if (unsavedCheckRef) unsavedCheckRef.current = hasUnsavedChanges;
+    if (triggerSaveModalRef) triggerSaveModalRef.current = () => setShowUnsavedModal(true);
+    return () => {
+      if (unsavedCheckRef) unsavedCheckRef.current = null;
+      if (triggerSaveModalRef) triggerSaveModalRef.current = null;
+    };
+  }, [hasUnsavedChanges, unsavedCheckRef, triggerSaveModalRef]);
 
   useEffect(() => {
     if (!mountedRef.current) { mountedRef.current = true; return; }
@@ -147,7 +175,7 @@ export function RuleBuilder({ mode, onClose, onSave, initialRules, initialJuncti
           </div>
         </div>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#f5f6fa] text-[#9b9daf] hover:text-[#6c6e82] transition-colors mt-0.5"
         >
           <CloseIcon />
@@ -198,7 +226,7 @@ export function RuleBuilder({ mode, onClose, onSave, initialRules, initialJuncti
       </div>
       <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#e5e7f0] flex-shrink-0">
         <button
-          onClick={onClose}
+          onClick={onCancel}
           className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
         >
           Cancel
@@ -210,6 +238,7 @@ export function RuleBuilder({ mode, onClose, onSave, initialRules, initialJuncti
               .map((r) => ({ ruleType: r.ruleType!, label: getRuleLabel(r) || "" }))
               .filter((s) => s.label);
             onSave({ summaries, rules, junctions });
+            savedStateRef.current = JSON.stringify({ rules, junctions });
             onClose();
           }}
           className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
@@ -217,6 +246,41 @@ export function RuleBuilder({ mode, onClose, onSave, initialRules, initialJuncti
           Save rule
         </button>
       </div>
+
+      {showUnsavedModal && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20">
+          <div className="bg-white rounded-xl border border-[#e5e7f0] shadow-[0_4px_24px_rgba(0,0,0,0.12)] p-6 mx-6 max-w-sm w-full">
+            <h3 className="text-[14px] font-bold text-[#1a1b2e] mb-1">Save changes?</h3>
+            <p className="text-[12px] text-[#6c6e82] mb-5">You have unsaved changes to this rule. Would you like to save them before closing?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  onCancel();
+                }}
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+              >
+                No, cancel updates
+              </button>
+              <button
+                onClick={() => {
+                  const summaries: SavedRuleSummary[] = rules
+                    .filter((r) => r.ruleType)
+                    .map((r) => ({ ruleType: r.ruleType!, label: getRuleLabel(r) || "" }))
+                    .filter((s) => s.label);
+                  onSave({ summaries, rules, junctions });
+                  savedStateRef.current = JSON.stringify({ rules, junctions });
+                  setShowUnsavedModal(false);
+                  onClose();
+                }}
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+              >
+                Yes, save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

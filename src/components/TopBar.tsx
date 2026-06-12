@@ -2,13 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 
-const tabs = [
-  { id: "journey", label: "Journey" },
-  { id: "review", label: "Review" },
-];
+interface TopBarProps {
+  onSettingsClick?: () => void;
+}
 
-export function TopBar() {
-  const [activeTab, setActiveTab] = useState("journey");
+export function TopBar({ onSettingsClick }: TopBarProps) {
   const [journeyName, setJourneyName] = useState("New Journey");
   const [isEditing, setIsEditing] = useState(false);
   const [saveMenuOpen, setSaveMenuOpen] = useState(false);
@@ -74,29 +72,18 @@ export function TopBar() {
         </div>
       </div>
 
-      <div className="flex items-center bg-[#f5f6fa] rounded-lg border border-[#e5e7f0] p-0.5">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all ${
-              activeTab === tab.id
-                ? "bg-white text-[#1a1b2e] shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-                : "text-[#9b9daf] hover:text-[#6c6e82]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div />
 
       <div className="flex items-center gap-2">
-        <button className="px-4 py-1.5 text-[13px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors flex items-center gap-2">
+        <button
+          onClick={onSettingsClick}
+          className="px-4 py-1.5 text-[13px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors flex items-center gap-2"
+        >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1b2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          Settings
+          Exit settings
         </button>
 
         <div className="relative" ref={saveMenuRef}>

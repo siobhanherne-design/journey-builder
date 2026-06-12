@@ -34,6 +34,7 @@ import {
 } from "./nodes";
 import { StepPalette, StepMenu, stepMenuItems } from "./StepPalette";
 import { RightPanel } from "./RightPanel";
+import { ExitSettingsBuilder } from "./right-panel/ExitSettingsBuilder";
 
 const nodeTypes = {
   heading: HeadingNode,
@@ -208,7 +209,12 @@ function ReturnToJourneyButton() {
 const PALETTE_WIDTH = 200;
 const PANEL_RATIO = 0.5;
 
-function JourneyCanvasInner() {
+interface JourneyCanvasProps {
+  settingsOpen?: boolean;
+  onCloseSettings?: () => void;
+}
+
+function JourneyCanvasInner({ settingsOpen, onCloseSettings }: JourneyCanvasProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { setViewport, getViewport } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -223,6 +229,17 @@ function JourneyCanvasInner() {
   const [menuPos, setMenuPos] = useState<ConnectorMenuPos | null>(null);
   const [minimapOpen, setMinimapOpen] = useState(true);
   const draftsRef = useRef<Record<string, any>>({});
+  const unsavedCheckRef = useRef<(() => boolean) | null>(null);
+  const triggerSaveModalRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (settingsOpen) {
+      setRightPanelOpen(false);
+      setSelectedNodeId(null);
+      setSelectedNodeType(null);
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: false })));
+    }
+  }, [settingsOpen, setNodes]);
 
   const panToNode = useCallback(
     (position: { x: number; y: number }, nodeWidth = 220, nodeHeight = 60) => {
@@ -376,21 +393,32 @@ function JourneyCanvasInner() {
       if (selectedNodes.length === 1) {
         const node = selectedNodes[0];
         const type = node.type || null;
+
+        if (rightPanelOpen && unsavedCheckRef.current?.()) {
+          triggerSaveModalRef.current?.();
+          return;
+        }
+
         setSelectedNodeId(node.id);
         setSelectedNodeType(type);
         if (type && PANEL_NODE_TYPES.has(type)) {
           setRightPanelOpen(true);
+          onCloseSettings?.();
           dismissHeading();
         } else {
           setRightPanelOpen(false);
         }
       } else {
+        if (rightPanelOpen && unsavedCheckRef.current?.()) {
+          triggerSaveModalRef.current?.();
+          return;
+        }
         setSelectedNodeId(null);
         setSelectedNodeType(null);
         setRightPanelOpen(false);
       }
     },
-    [dismissHeading],
+    [dismissHeading, rightPanelOpen],
   );
 
   const selectedNodeData = selectedNodeId
@@ -400,10 +428,16 @@ function JourneyCanvasInner() {
   const handleRuleSave = useCallback(
     ({ summaries, rules, junctions }: { summaries: SavedRuleSummary[]; rules: Rule[]; junctions: Junction[] }) => {
       if (!selectedNodeId) return;
+      let estimated = 0;
+      for (const rule of rules) {
+        if (rule.ruleType === "audience" && rule.audienceName) estimated += Math.floor(Math.random() * 40000 + 8000);
+        else if (rule.ruleType === "event" && rule.categoryName) estimated += Math.floor(Math.random() * 50000 + 10000);
+        else if (rule.ruleType === "fact" && rule.categoryName) estimated += Math.floor(Math.random() * 30000 + 5000);
+      }
       setNodes((nds) =>
         nds.map((n) =>
           n.id === selectedNodeId
-            ? { ...n, data: { ...n.data, savedRules: summaries, fullRules: rules, fullJunctions: junctions } }
+            ? { ...n, data: { ...n.data, savedRules: summaries, fullRules: rules, fullJunctions: junctions, estimatedProfiles: estimated || undefined } }
             : n,
         ),
       );
@@ -733,7 +767,12 @@ function JourneyCanvasInner() {
       )}
       <RightPanel
         open={rightPanelOpen}
-        onClose={() => setRightPanelOpen(false)}
+        onClose={() => {
+          setRightPanelOpen(false);
+          setSelectedNodeId(null);
+          setSelectedNodeType(null);
+          setNodes((nds) => nds.map((n) => ({ ...n, selected: false })));
+        }}
         nodeType={selectedNodeType}
         nodeId={selectedNodeId}
         nodeData={selectedNodeData}
@@ -741,16 +780,25 @@ function JourneyCanvasInner() {
         onSaveTimeDelay={handleTimeDelaySave}
         onSaveDestination={handleDestinationSave}
         drafts={draftsRef.current}
+        unsavedCheckRef={unsavedCheckRef}
+        triggerSaveModalRef={triggerSaveModalRef}
       />
+      <div
+        className={`absolute top-0 right-0 h-full w-[50vw] min-w-[400px] bg-white border-l border-[#e5e7f0] shadow-[-4px_0_16px_rgba(0,0,0,0.04)] z-20 transition-transform duration-200 ease-out ${
+          settingsOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <ExitSettingsBuilder onClose={() => onCloseSettings?.()} />
+      </div>
     </div>
     </ConnectorContext.Provider>
   );
 }
 
-export function JourneyCanvas() {
+export function JourneyCanvas({ settingsOpen, onCloseSettings }: JourneyCanvasProps) {
   return (
     <ReactFlowProvider>
-      <JourneyCanvasInner />
+      <JourneyCanvasInner settingsOpen={settingsOpen} onCloseSettings={onCloseSettings} />
     </ReactFlowProvider>
   );
 }

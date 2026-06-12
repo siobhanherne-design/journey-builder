@@ -8,6 +8,7 @@ export type EntryRuleNodeData = {
   label: string;
   stepLabel?: string;
   savedRules?: SavedRuleSummary[];
+  estimatedProfiles?: number;
 };
 export type EntryRuleNodeType = Node<EntryRuleNodeData, "entry_rule">;
 
@@ -64,17 +65,24 @@ export function EntryRuleNode({ id, data, selected }: NodeProps<EntryRuleNodeTyp
       </div>
 
       {hasSavedRules && (
-        <div className="mt-2.5 space-y-1.5">
-          {data.savedRules!.map((rule, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 rounded-lg bg-[#f5f6fa] px-3 py-2"
-            >
-              <RuleTypeIcon ruleType={rule.ruleType} />
-              <span className="text-[12px] text-[#1a1b2e]">{rule.label}</span>
+        <>
+          <div className="mt-2.5 space-y-1.5">
+            {data.savedRules!.map((rule, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 rounded-lg bg-[#f5f6fa] px-3 py-2"
+              >
+                <RuleTypeIcon ruleType={rule.ruleType} />
+                <span className="text-[12px] text-[#1a1b2e]">{rule.label}</span>
+              </div>
+            ))}
+          </div>
+          {data.estimatedProfiles != null && (
+            <div className="mt-2.5 text-[13px] font-semibold text-[#1a1b2e]">
+              ~ {data.estimatedProfiles.toLocaleString()}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
       <Handle type="source" position={Position.Right} className="!bg-white !border-[#a5b4fc]" />
     </div>

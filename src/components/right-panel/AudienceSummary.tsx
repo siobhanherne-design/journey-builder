@@ -164,10 +164,10 @@ export function AudienceSummary({ rules, junctions }: AudienceSummaryProps) {
           )}
         </div>
         <div className="flex-shrink-0 text-right border-l border-[#e5e7f0] pl-4">
-          <div className="text-[16px] font-bold text-[#1a1b2e]">
+          <div className="text-[18px] font-bold text-[#1a1b2e]">
             ~{count.toLocaleString()}
           </div>
-          <div className="text-[10px] text-[#9b9daf]">Estimated profiles</div>
+          <div className="text-[12px] text-[#9b9daf]">Estimated profiles</div>
         </div>
       </div>
     </div>
