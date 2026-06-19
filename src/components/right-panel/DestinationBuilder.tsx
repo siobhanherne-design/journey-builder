@@ -72,7 +72,7 @@ function ConnectorRow({
                 }
                 className={`appearance-none rounded-md ${
                   connector.platformId ? "pl-9 bg-[#fbfbfb] border border-[#e5e7f0]" : "pl-3 bg-white border border-[#e5e7f0]"
-                } pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer`}
+                } pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer`}
               >
                 <option value="" disabled>
                   Select platform
@@ -94,7 +94,7 @@ function ConnectorRow({
                 onChange({ ...connector, accountId: e.target.value })
               }
               disabled={!connector.platformId}
-              className={`w-full appearance-none rounded-md pl-3 pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full appearance-none rounded-md pl-3 pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                 connector.accountId ? "bg-[#fbfbfb] border border-[#e5e7f0]" : "bg-white border border-[#e5e7f0]"
               }`}
             >
@@ -250,7 +250,7 @@ export function DestinationBuilder({
         <div className="pt-1">
           <button
             onClick={handleAdd}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors bg-white"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Add connector
@@ -262,13 +262,13 @@ export function DestinationBuilder({
       <div className="flex items-center gap-2 px-5 py-4 border-t border-[#e5e7f0] flex-shrink-0">
         <button
           onClick={onCancel}
-          className="flex-1 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+          className="flex-1 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
-          className="flex-1 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+          className="flex-1 py-2 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] active:bg-[#3730a3] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Save rule
         </button>
@@ -282,13 +282,13 @@ export function DestinationBuilder({
             <div className="flex gap-2">
               <button
                 onClick={() => { setShowUnsavedModal(false); onCancel(); }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors"
               >
                 No, cancel updates
               </button>
               <button
                 onClick={() => { handleSave(); setShowUnsavedModal(false); }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] transition-colors"
               >
                 Yes, save changes
               </button>

@@ -10,12 +10,12 @@ interface AndOrToggleProps {
 export function AndOrToggle({ value, onChange }: AndOrToggleProps) {
   return (
     <div className="flex items-center justify-start py-2">
-      <div className="flex items-center bg-[#f5f6fa] rounded-lg border border-[#e5e7f0] p-0.5">
+      <div className="flex items-center rounded-lg border border-[#e5e7f0] bg-[#f9fafb]">
         <button
           onClick={() => onChange("AND")}
-          className={`px-3 py-1 text-[12px] font-semibold rounded-md transition-all ${
+          className={`px-3.5 py-1 text-[12px] font-semibold rounded-md transition-all ${
             value === "AND"
-              ? "bg-white text-[#1a1b2e] shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              ? "bg-white text-[#4f46e5] border border-[#e5e7f0] shadow-[0_1px_2px_rgba(0,0,0,0.06)] -m-px"
               : "text-[#9b9daf] hover:text-[#6c6e82]"
           }`}
         >
@@ -23,9 +23,9 @@ export function AndOrToggle({ value, onChange }: AndOrToggleProps) {
         </button>
         <button
           onClick={() => onChange("OR")}
-          className={`px-3 py-1 text-[12px] font-semibold rounded-md transition-all ${
+          className={`px-3.5 py-1 text-[12px] font-semibold rounded-md transition-all ${
             value === "OR"
-              ? "bg-white text-[#1a1b2e] shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              ? "bg-white text-[#4f46e5] border border-[#e5e7f0] shadow-[0_1px_2px_rgba(0,0,0,0.06)] -m-px"
               : "text-[#9b9daf] hover:text-[#6c6e82]"
           }`}
         >

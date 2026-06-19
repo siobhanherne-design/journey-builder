@@ -69,7 +69,7 @@ export const eventTypes: EventType[] = [
   },
   {
     id: "viewed_page",
-    label: "Viewed Page",
+    label: "Page visit",
     properties: [
       { name: "Page Type", type: "string", values: ["Homepage", "Sale", "Category", "Blog", "Brand page"] },
       { name: "Page Name", type: "string", values: ["Men's Sale", "Nike Collection", "Summer Lookbook", "New Arrivals"] },

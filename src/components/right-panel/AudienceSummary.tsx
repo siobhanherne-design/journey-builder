@@ -24,6 +24,29 @@ function estimateProfiles(rules: Rule[]): number {
   return total || 304680;
 }
 
+function PropertySummary({ properties }: { properties: Rule["properties"] }) {
+  const valid = properties.filter((p) => p.propertyName && p.propertyName !== "__unset__");
+  if (valid.length === 0) return null;
+
+  return (
+    <>
+      {valid.map((prop, i) => (
+        <span key={prop.id}>
+          {i > 0 && <span className="text-[#9b9daf]">{" and "}</span>}
+          {" · "}
+          {prop.propertyName}
+          {prop.operator && prop.value && (
+            <>
+              {" "}
+              {prop.operator} <strong>{prop.value}</strong>
+            </>
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function RuleSummaryText({ rule }: { rule: Rule }) {
   if (!rule.ruleType) return null;
 
@@ -33,18 +56,7 @@ function RuleSummaryText({ rule }: { rule: Rule }) {
     return (
       <span>
         Profiles who <strong>{name}</strong>
-        {rule.properties.length > 0 && rule.properties[0].propertyName && (
-          <>
-            {" · "}
-            {rule.properties[0].propertyName}
-            {rule.properties[0].operator && rule.properties[0].value && (
-              <>
-                {" "}
-                {rule.properties[0].operator} <strong>{rule.properties[0].value}</strong>
-              </>
-            )}
-          </>
-        )}
+        <PropertySummary properties={rule.properties} />
         {rule.coOccurrenceValue && rule.timeframeValue && (
           <>
             {" "}
@@ -71,18 +83,7 @@ function RuleSummaryText({ rule }: { rule: Rule }) {
     return (
       <span>
         Profiles who <strong>{name}</strong>
-        {rule.properties.length > 0 && rule.properties[0].propertyName && (
-          <>
-            {" · "}
-            {rule.properties[0].propertyName}
-            {rule.properties[0].operator && rule.properties[0].value && (
-              <>
-                {" "}
-                {rule.properties[0].operator} <strong>{rule.properties[0].value}</strong>
-              </>
-            )}
-          </>
-        )}
+        <PropertySummary properties={rule.properties} />
       </span>
     );
   }

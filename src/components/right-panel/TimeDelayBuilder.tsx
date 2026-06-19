@@ -44,7 +44,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${fullWidth ? "w-full" : ""} appearance-none rounded-md pl-3 pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer ${
+        className={`${fullWidth ? "w-full" : ""} appearance-none rounded-md pl-3 pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer ${
           value ? "bg-[#fbfbfb] border border-[#e5e7f0]" : "bg-white border border-[#e5e7f0]"
         }`}
       >
@@ -77,7 +77,7 @@ function NumberInput({
       min={1}
       value={value}
       onChange={(e) => onChange(parseInt(e.target.value) || 1)}
-      className="w-14 rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-2 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 text-center"
+      className="w-14 rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-2 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 text-center"
     />
   );
 }
@@ -100,11 +100,11 @@ function RadioOption({
     >
       <div
         className={`w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-          selected ? "border-[#1a1b2e]" : "border-[#d0d3e0]"
+          selected ? "border-[#4f46e5]" : "border-[#d0d3e0]"
         }`}
       >
         {selected && (
-          <div className="w-2.5 h-2.5 rounded-full bg-[#1a1b2e]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#4f46e5]" />
         )}
       </div>
       <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
                   type="date"
                   value={specificDate}
                   onChange={(e) => setSpecificDate(e.target.value)}
-                  className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 cursor-pointer"
+                  className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 cursor-pointer"
                 />
               </div>
             </div>
@@ -425,7 +425,7 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
                       type="date"
                       value={dynamicDate}
                       onChange={(e) => setDynamicDate(e.target.value)}
-                      className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 cursor-pointer"
+                      className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 cursor-pointer"
                     />
                   </div>
                 )}
@@ -438,7 +438,7 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
                         type="date"
                         value={dynamicDate}
                         onChange={(e) => setDynamicDate(e.target.value)}
-                        className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 cursor-pointer"
+                        className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 cursor-pointer"
                       />
                     </div>
                     <div className="flex-1">
@@ -447,7 +447,7 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
                         type="date"
                         value={dynamicDateEnd}
                         onChange={(e) => setDynamicDateEnd(e.target.value)}
-                        className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 cursor-pointer"
+                        className="w-full rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -553,13 +553,13 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
       <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-[#e5e7f0] flex-shrink-0">
         <button
           onClick={onCancel}
-          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
-          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] active:bg-[#3730a3] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Save rule
         </button>
@@ -573,13 +573,13 @@ export function TimeDelayBuilder({ onClose, onCancel, onSave, initialConfig, onD
             <div className="flex gap-2">
               <button
                 onClick={() => { setShowUnsavedModal(false); onCancel(); }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors"
               >
                 No, cancel updates
               </button>
               <button
                 onClick={() => { handleSave(); setShowUnsavedModal(false); }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] transition-colors"
               >
                 Yes, save changes
               </button>

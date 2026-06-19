@@ -160,7 +160,7 @@ export function SplitNode({ id, data, selected }: NodeProps<SplitNodeType>) {
               value={path.percentage}
               onChange={(e) => updatePercentage(path.id, e.target.value)}
               onClick={(e) => e.stopPropagation()}
-              className="w-14 rounded-md bg-white border border-[#e5e7f0] px-2 py-1 text-[12px] text-[#1a1b2e] text-right focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30"
+              className="w-14 rounded-md bg-white border border-[#e5e7f0] px-2 py-1 text-[12px] text-[#1a1b2e] text-right focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40"
             />
             <span className="text-[12px] text-[#9b9daf]">%</span>
 

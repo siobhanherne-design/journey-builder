@@ -35,6 +35,7 @@ import {
 import { StepPalette, StepMenu, stepMenuItems } from "./StepPalette";
 import { RightPanel } from "./RightPanel";
 import { ExitSettingsBuilder } from "./right-panel/ExitSettingsBuilder";
+import { LoopbackEdge } from "./edges/LoopbackEdge";
 
 const nodeTypes = {
   heading: HeadingNode,
@@ -45,6 +46,10 @@ const nodeTypes = {
   split: SplitNode,
   goal: GoalNode,
   destination: DestinationNode,
+};
+
+const edgeTypes = {
+  loopback: LoopbackEdge,
 };
 
 const defaultLabels: Record<string, string> = {
@@ -521,15 +526,15 @@ function JourneyCanvasInner({ settingsOpen, onCloseSettings }: JourneyCanvasProp
   const isValidConnection = useCallback(
     (connection: Edge | Connection) => {
       if (connection.source === connection.target) return false;
-      const targetHasConnection = edges.some(
-        (e) => e.target === connection.target && (e.targetHandle || null) === (connection.targetHandle || null),
-      );
-      if (targetHasConnection) return false;
       const sourceHandleId = connection.sourceHandle || null;
       const sourceHasConnection = edges.some(
         (e) => e.source === connection.source && (e.sourceHandle || null) === sourceHandleId,
       );
       if (sourceHasConnection) return false;
+      const duplicateEdge = edges.some(
+        (e) => e.source === connection.source && e.target === connection.target,
+      );
+      if (duplicateEdge) return false;
       return true;
     },
     [edges],
@@ -657,16 +662,27 @@ function JourneyCanvasInner({ settingsOpen, onCloseSettings }: JourneyCanvasProp
 
   const edgesWithLabels = useMemo(() => {
     return edges.map((edge) => {
-      if (!edge.sourceHandle) return edge;
       const sourceNode = nodes.find((n) => n.id === edge.source);
-      if (!sourceNode || sourceNode.type !== "split") return edge;
-      const paths: SplitPath[] = (sourceNode.data as any)?.paths || [
-        { id: "a", label: "Path A", percentage: 50 },
-        { id: "b", label: "Path B", percentage: 50 },
-      ];
-      const path = paths.find((p) => p.id === edge.sourceHandle);
-      if (!path) return edge;
-      return { ...edge, label: `${path.percentage}%` };
+      const targetNode = nodes.find((n) => n.id === edge.target);
+
+      let updated = edge;
+
+      if (sourceNode && targetNode && targetNode.position.x <= sourceNode.position.x) {
+        updated = { ...updated, type: "loopback" };
+      }
+
+      if (edge.sourceHandle && sourceNode?.type === "split") {
+        const paths: SplitPath[] = (sourceNode.data as any)?.paths || [
+          { id: "a", label: "Path A", percentage: 50 },
+          { id: "b", label: "Path B", percentage: 50 },
+        ];
+        const path = paths.find((p) => p.id === edge.sourceHandle);
+        if (path) {
+          updated = { ...updated, label: `${path.percentage}%` };
+        }
+      }
+
+      return updated;
     });
   }, [edges, nodes]);
 
@@ -688,6 +704,7 @@ function JourneyCanvasInner({ settingsOpen, onCloseSettings }: JourneyCanvasProp
           onSelectionChange={onSelectionChange}
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
           minZoom={MIN_ZOOM}
           maxZoom={MAX_ZOOM}

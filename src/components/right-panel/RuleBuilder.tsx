@@ -208,7 +208,7 @@ export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, ini
           <div className="pt-4">
             <button
               onClick={handleAddRule}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors bg-white"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
             >
               <PlusIcon className="w-3.5 h-3.5" />
               Add rule
@@ -227,7 +227,7 @@ export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, ini
       <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#e5e7f0] flex-shrink-0">
         <button
           onClick={onCancel}
-          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Cancel
         </button>
@@ -241,7 +241,7 @@ export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, ini
             savedStateRef.current = JSON.stringify({ rules, junctions });
             onClose();
           }}
-          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] active:bg-[#3730a3] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Save rule
         </button>
@@ -258,7 +258,7 @@ export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, ini
                   setShowUnsavedModal(false);
                   onCancel();
                 }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors"
               >
                 No, cancel updates
               </button>
@@ -273,7 +273,7 @@ export function RuleBuilder({ mode, onClose, onCancel, onSave, initialRules, ini
                   setShowUnsavedModal(false);
                   onClose();
                 }}
-                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+                className="flex-1 px-4 py-2 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] transition-colors"
               >
                 Yes, save changes
               </button>

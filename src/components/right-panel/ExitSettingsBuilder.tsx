@@ -99,7 +99,7 @@ function InlineRuleBuilder({
         <div className="pt-3">
           <button
             onClick={handleAddRule}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors bg-white"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors bg-white focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Add rule
@@ -126,14 +126,15 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
       <div className="flex items-start justify-between px-5 py-2 border-b border-[#e5e7f0]">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#f5f6fa] border border-[#e5e7f0] flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1b2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9b9daf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
           </div>
           <div>
-            <h2 className="text-[14px] font-bold text-[#1a1b2e]">Exit settings</h2>
-            <p className="text-[12px] text-[#9b9daf]">How and when are profiles removed from the journey.</p>
+            <h2 className="text-[14px] font-bold text-[#1a1b2e]">Exit criteria</h2>
+            <p className="text-[12px] text-[#9b9daf]">Define how and when profiles are removed from this journey.</p>
           </div>
         </div>
         <button
@@ -169,7 +170,7 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
             {!exitOpen && (
               <button
                 onClick={() => setExitOpen(true)}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-[#6c6e82] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-[#6c6e82] border border-[#e5e7f0] rounded-md hover:bg-[#f5f6fa] transition-colors"
               >
                 <PlusIcon className="w-3.5 h-3.5" />
                 Add exit rule
@@ -213,7 +214,7 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
             {!goalOpen && (
               <button
                 onClick={() => setGoalOpen(true)}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-[#6c6e82] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-[#6c6e82] border border-[#e5e7f0] rounded-md hover:bg-[#f5f6fa] transition-colors"
               >
                 <PlusIcon className="w-3.5 h-3.5" />
                 Add goal
@@ -245,7 +246,7 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-[13px] font-semibold text-[#1a1b2e]">Expiration</h3>
-              <p className="text-[11px] text-[#9b9daf]">Max time a profile remains in this journey</p>
+              <p className="text-[11px] text-[#9b9daf]">Maximum time a profile will remain in the journey</p>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <input
@@ -253,13 +254,13 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
                 min={1}
                 value={durationValue}
                 onChange={(e) => setDurationValue(parseInt(e.target.value) || 1)}
-                className="w-14 rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-2 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 text-center"
+                className="w-14 rounded-md bg-[#fbfbfb] border border-[#e5e7f0] px-2 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 text-center"
               />
               <div className="relative">
                 <select
                   value={durationUnit}
                   onChange={(e) => setDurationUnit(e.target.value)}
-                  className="appearance-none rounded-md bg-[#fbfbfb] border border-[#e5e7f0] pl-2.5 pr-6 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 cursor-pointer"
+                  className="appearance-none rounded-md bg-[#fbfbfb] border border-[#e5e7f0] pl-2.5 pr-6 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 cursor-pointer"
                 >
                   <option value="days">days</option>
                   <option value="weeks">weeks</option>
@@ -275,13 +276,13 @@ export function ExitSettingsBuilder({ onClose }: ExitSettingsBuilderProps) {
       <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#e5e7f0] flex-shrink-0">
         <button
           onClick={onClose}
-          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-lg hover:bg-[#f5f6fa] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-[#1a1b2e] border border-[#e5e7f0] rounded-md hover:bg-[#1a1b2e] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Cancel
         </button>
         <button
           onClick={onClose}
-          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#1a1b2e] rounded-lg hover:bg-[#2d2e42] transition-colors"
+          className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#4f46e5] rounded-md hover:bg-[#4338ca] active:bg-[#3730a3] transition-colors focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30"
         >
           Save settings
         </button>

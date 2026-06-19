@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { Rule, RuleProperty, PanelMode } from "@/lib/types";
 import type { PropertyDef } from "@/lib/types";
 import {
@@ -64,32 +65,75 @@ function SelectDropdown({
   options,
   placeholder,
   className: extraClass,
+  menuWidth = 260,
 }: {
   value: string | null;
   onChange: (val: string) => void;
   options: { id: string; label: string }[];
   placeholder: string;
   className?: string;
+  menuWidth?: number;
 }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const selectedLabel = options.find((o) => o.id === value)?.label;
+
+  const handleOpen = () => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+    setOpen(!open);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (triggerRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
   return (
     <div className={`relative ${extraClass || ""}`}>
-      <select
-        value={value || ""}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full appearance-none rounded-md pl-3 pr-7 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer ${
-          value ? "bg-[#fbfbfb] border border-[#e5e7f0]" : "bg-white border border-[#e5e7f0]"
-        }`}
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={handleOpen}
+        className={`w-full text-left rounded-md pl-3 pr-7 py-1.5 text-[12px] border border-[#e5e7f0] transition-all cursor-pointer truncate ${
+          open ? "ring-2 ring-[#4f46e5]/30 border-[#4f46e5]/40" : ""
+        } ${value && selectedLabel ? "text-[#1a1b2e] bg-[#fbfbfb]" : "text-[#9b9daf] bg-white"}`}
       >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        {options.map((opt) => (
-          <option key={opt.id} value={opt.id}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9b9daf] pointer-events-none" />
+        {selectedLabel || placeholder}
+      </button>
+      <ChevronDownIcon className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9b9daf] pointer-events-none transition-transform ${open ? "rotate-180" : ""}`} />
+      {open && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-[9999] bg-white rounded-lg border border-[#e5e7f0] shadow-[0_4px_16px_rgba(0,0,0,0.08)] py-1 max-h-[200px] overflow-y-auto picker-scroll animate-[fadeSlideDown_100ms_ease-out]"
+          style={{ top: pos.top, left: pos.left, width: Math.max(pos.width, menuWidth), minWidth: menuWidth }}
+        >
+          {options.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => { onChange(opt.id); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-[12px] whitespace-nowrap transition-colors ${
+                opt.id === value
+                  ? "text-[#1a1b2e] bg-[#f5f6fa] font-medium"
+                  : "text-[#1a1b2e] hover:bg-[#f5f6fa]"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -104,14 +148,22 @@ function InlinePropertyFields({
   property,
   propertyDefs,
   onUpdate,
+  usedProperties,
 }: {
   property: RuleProperty;
   propertyDefs: PropertyDef[];
   onUpdate: (updates: Partial<RuleProperty>) => void;
+  usedProperties: (string | null)[];
 }) {
-  const propertyOptions = propertyDefs.map((p) => ({ id: p.name, label: p.name }));
+  const otherUsed = usedProperties.filter((p) => p !== property.propertyName && p !== "__unset__");
+  const propertyOptions = [
+    ...(!otherUsed.includes(null) ? [{ id: "__any__", label: "Any" }] : []),
+    ...propertyDefs
+      .filter((p) => !otherUsed.includes(p.name))
+      .map((p) => ({ id: p.name, label: p.name })),
+  ];
 
-  const selectedPropDef = property.propertyName
+  const selectedPropDef = property.propertyName && property.propertyName !== "__unset__"
     ? propertyDefs.find((p) => p.name === property.propertyName)
     : null;
 
@@ -134,13 +186,17 @@ function InlinePropertyFields({
   return (
     <>
       <SelectDropdown
-        value={property.propertyName}
+        value={property.propertyName === "__unset__" ? null : (property.propertyName || "__any__")}
         onChange={(val) => {
-          const def = propertyDefs.find((p) => p.name === val);
-          if (def?.type === "date") {
-            onUpdate({ propertyName: val, operator: "was within the last", value: "5", unit: "days" });
+          if (val === "__any__") {
+            onUpdate({ propertyName: null, operator: null, value: null, unit: null });
           } else {
-            onUpdate({ propertyName: val, operator: null, value: null, unit: null });
+            const def = propertyDefs.find((p) => p.name === val);
+            if (def?.type === "date") {
+              onUpdate({ propertyName: val, operator: "was within the last", value: "5", unit: "days" });
+            } else {
+              onUpdate({ propertyName: val, operator: null, value: null, unit: null });
+            }
           }
         }}
         options={propertyOptions}
@@ -154,7 +210,8 @@ function InlinePropertyFields({
             onChange={(val) => onUpdate({ operator: val })}
             options={availableOperators}
             placeholder="is"
-            className="flex-shrink-0"
+            className="flex-shrink-0 min-w-[80px]"
+            menuWidth={190}
           />
           {valueOptions.length > 0 ? (
             <SelectDropdown
@@ -170,7 +227,7 @@ function InlinePropertyFields({
               value={property.value || ""}
               onChange={(e) => onUpdate({ value: e.target.value })}
               placeholder="Value"
-              className={`flex-1 min-w-0 rounded-md px-3 py-1.5 text-[12px] text-[#1a1b2e] placeholder:text-[#b0b2c0] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all ${
+              className={`flex-1 min-w-0 rounded-md px-3 py-1.5 text-[12px] text-[#1a1b2e] placeholder:text-[#b0b2c0] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all ${
                 property.value ? "bg-[#fbfbfb] border border-[#e5e7f0]" : "bg-white border border-[#e5e7f0]"
               }`}
             />
@@ -191,7 +248,8 @@ function InlinePropertyFields({
             }}
             options={availableOperators}
             placeholder="Condition"
-            className="flex-shrink-0"
+            className="flex-shrink-0 min-w-[80px]"
+            menuWidth={190}
           />
           {selectedDateOp?.requiresUnit && (
             <>
@@ -200,7 +258,7 @@ function InlinePropertyFields({
                 min={1}
                 value={property.value || ""}
                 onChange={(e) => onUpdate({ value: e.target.value })}
-                className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all"
+                className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all"
               />
               <SelectDropdown
                 value={property.unit || null}
@@ -208,6 +266,7 @@ function InlinePropertyFields({
                 options={dateUnits.map((u) => ({ id: u, label: u }))}
                 placeholder="unit"
                 className="flex-shrink-0"
+                menuWidth={190}
               />
               {selectedDateOp.suffix && (
                 <span className="text-[12px] text-[#636363] flex-shrink-0">{selectedDateOp.suffix}</span>
@@ -220,14 +279,14 @@ function InlinePropertyFields({
                 type="date"
                 value={property.value || ""}
                 onChange={(e) => onUpdate({ value: e.target.value })}
-                className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer"
+                className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer"
               />
               <span className="text-[12px] text-[#636363]">and</span>
               <input
                 type="date"
                 value={property.unit || ""}
                 onChange={(e) => onUpdate({ unit: e.target.value })}
-                className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer"
+                className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer"
               />
             </>
           ) : selectedDateOp && !selectedDateOp.requiresUnit && selectedDateOp.inputType === "datepicker" ? (
@@ -235,7 +294,7 @@ function InlinePropertyFields({
               type="date"
               value={property.value || ""}
               onChange={(e) => onUpdate({ value: e.target.value })}
-              className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all cursor-pointer"
+              className="flex-1 min-w-0 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-3 py-1.5 text-[12px] text-[#1a1b2e] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all cursor-pointer"
             />
           ) : null}
         </>
@@ -294,28 +353,22 @@ export function RuleRow({
         properties: [],
       });
     } else if (selection.ruleType === "event") {
-      const properties = selection.propertyName
-        ? [{ id: Date.now() + Math.random(), propertyName: selection.propertyName, operator: null, value: null }]
-        : [];
       onChange({
         ...rule,
         ruleType: "event",
         categoryName: selection.categoryName || null,
         audienceName: null,
-        properties,
+        properties: [{ id: Date.now() + Math.random(), propertyName: selection.propertyName || null, operator: null, value: null }],
         timeframeValue: 30,
         timeframeUnit: "Days",
       });
     } else {
-      const properties = selection.propertyName
-        ? [{ id: Date.now() + Math.random(), propertyName: selection.propertyName, operator: null, value: null }]
-        : [];
       onChange({
         ...rule,
         ruleType: "fact",
         categoryName: selection.categoryName || null,
         audienceName: null,
-        properties,
+        properties: [{ id: Date.now() + Math.random(), propertyName: selection.propertyName || null, operator: null, value: null }],
       });
     }
   };
@@ -325,7 +378,7 @@ export function RuleRow({
       ...rule,
       properties: [
         ...rule.properties,
-        { id: Date.now() + Math.random(), propertyName: null, operator: null, value: null },
+        { id: Date.now() + Math.random(), propertyName: "__unset__", operator: null, value: null },
       ],
     });
   };
@@ -403,6 +456,7 @@ export function RuleRow({
                   property={rule.properties[0]}
                   propertyDefs={propertyDefs}
                   onUpdate={(updates) => handlePropertyUpdate(0, updates)}
+                  usedProperties={rule.properties.map((p) => p.propertyName)}
                 />
               )}
               <button
@@ -434,6 +488,7 @@ export function RuleRow({
                   property={prop}
                   propertyDefs={propertyDefs}
                   onUpdate={(updates) => handlePropertyUpdate(i + 1, updates)}
+                  usedProperties={rule.properties.map((p) => p.propertyName)}
                 />
                 <button
                   onClick={() => handlePropertyRemove(i + 1)}
@@ -463,13 +518,14 @@ export function RuleRow({
                     options={[{ id: "at_least", label: "At least" }, { id: "at_most", label: "At most" }, { id: "exactly", label: "Exactly" }]}
                     placeholder="At least"
                     className="flex-shrink-0"
+                    menuWidth={190}
                   />
                   <input
                     type="number"
                     min={1}
                     value={rule.coOccurrenceValue}
                     onChange={(e) => onChange({ ...rule, coOccurrenceValue: parseInt(e.target.value) || 1 })}
-                    className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all"
+                    className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all"
                   />
                   <span className="text-[12px] text-[#636363]">time, in the last</span>
                   <input
@@ -477,7 +533,7 @@ export function RuleRow({
                     min={1}
                     value={rule.timeframeValue || 30}
                     onChange={(e) => onChange({ ...rule, timeframeValue: parseInt(e.target.value) || 30 })}
-                    className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-1 focus:ring-[#7c5cfc]/30 transition-all"
+                    className="w-14 rounded-md border border-[#e5e7f0] bg-[#fbfbfb] px-2 py-1.5 text-[12px] text-[#1a1b2e] text-center focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]/40 transition-all"
                   />
                   <SelectDropdown
                     value={rule.timeframeUnit.toLowerCase()}
@@ -485,23 +541,25 @@ export function RuleRow({
                     options={timeUnits.map((u) => ({ id: u.toLowerCase(), label: u.toLowerCase() }))}
                     placeholder="days"
                     className="flex-shrink-0"
+                    menuWidth={190}
                   />
                 </div>
               </>
             )}
 
             {/* Bottom row: Add property + timing toggle + reverse toggle */}
-            {rule.ruleType !== "audience" && (
-              <div className="flex items-center justify-between pt-0.5 pl-[22px]">
+            <div className="flex items-center justify-between pt-0.5 pl-[32px]">
+              {rule.ruleType !== "audience" ? (
                 <button
                   onClick={handlePropertyAdd}
-                  className="inline-flex items-center gap-1 text-[12px] text-[#7c5cfc] hover:text-[#6b4ce0] transition-colors"
+                  className="inline-flex items-center gap-1 text-[12px] text-[#4f46e5] hover:text-[#4338ca] transition-colors"
                 >
                   <PlusIcon className="w-3 h-3" />
                   Add property
                 </button>
-                <div className="flex items-center gap-3">
-                  {rule.ruleType === "event" && !timingOpen && (
+              ) : <div />}
+              <div className="flex items-center gap-3">
+                {rule.ruleType === "event" && !timingOpen && (
                     <button
                       onClick={() => {
                         setTimingOpen(true);
@@ -523,7 +581,7 @@ export function RuleRow({
                       aria-checked={isReversed}
                       onClick={() => onChange({ ...rule, includeExclude: isReversed ? "Include" : "Exclude" })}
                       className={`relative w-8 h-[18px] rounded-full transition-colors ${
-                        isReversed ? "bg-[#1a1b2e]" : "bg-[#d1d5db]"
+                        isReversed ? "bg-[#4f46e5]" : "bg-[#d1d5db]"
                       }`}
                     >
                       <span
@@ -540,7 +598,6 @@ export function RuleRow({
                   </label>
                 </div>
               </div>
-            )}
           </>
         )}
       </div>
